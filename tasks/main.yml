@@ -1,0 +1,3 @@
+---
+- include: install_sendmail.yml
+- include: configure_amazon_ses.yml

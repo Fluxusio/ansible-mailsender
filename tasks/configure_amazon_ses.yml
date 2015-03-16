@@ -1,0 +1,31 @@
+---
+# Based on the instructions in http://docs.aws.amazon.com/ses/latest/DeveloperGuide/sendmail.html
+- name: Set up authinfo
+  template: src=authinfo.j2 dest=/etc/mail/authinfo
+  sudo: yes
+
+- name: Generate authinfo.db
+  shell: makemap hash /etc/mail/authinfo.db < /etc/mail/authinfo
+  sudo: yes
+
+- name: Add support for relaying to the Amazon SES SMTP
+  lineinfile:
+    dest=/etc/mail/access
+    line='Connect:{{ ses_server }} RELAY'
+  sudo: yes
+
+- name: Regenerate /etc/mail/access.db
+  shell: makemap hash /etc/mail/access.db < /etc/mail/access
+  sudo: yes
+
+- name: Set up sendmail.mc
+  template: src=sendmail.mc.j2 dest=/etc/mail/sendmail.mc
+  sudo: yes
+
+- name: Regenerate sendmail.cf
+  shell: sudo m4 /etc/mail/sendmail.mc > /etc/mail/sendmail.cf
+  sudo: yes
+
+- name: Restart sendmail
+  service: name=sendmail state=restarted
+  sudo: yes

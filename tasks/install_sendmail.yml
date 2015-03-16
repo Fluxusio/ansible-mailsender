@@ -1,0 +1,24 @@
+---
+- name: Add localdomain entries to hosts for 127.0.0.1
+  replace:
+    dest=/etc/hosts
+    regexp='^127\.0\.0\.1\s+localhost\s*$'
+    replace='127.0.0.1 localhost.localdomain localhost'
+  sudo: yes
+
+- name: getting node name
+  shell: uname -n
+  register: node_name
+
+- name: Add localdomain entries to hosts for 127.0.1.1
+  lineinfile:
+    dest=/etc/hosts
+    regexp='^127\.0\.1\.1'
+    line='127.0.1.1 {{ node_name.stdout }}.localdomain {{ node_name.stdout }}'
+  sudo: yes
+
+- name: Install sendmail
+  apt: name=sendmail state=present update_cache=yes cache_valid_time=3600
+  sudo: yes
+
+
